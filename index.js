@@ -107,3 +107,57 @@ async function getProductsLinksFromCatalog (pageUrl, partUrl) {
 }
 
 }
+
+
+{   
+    let getFileFromBlob = (data, config = { type: 'text/plain' }) => {
+        let blob = new Blob([JSON.stringify(data)], config);
+        let file = URL.createObjectURL(blob);
+        
+        let link = document.createElement('a'); 
+        link.href = file; 
+        link.download = 'cilindr_nasad.json'; 
+        link.click();
+    }
+    
+    let priceCalculation = (price) => {
+        price = Math.round(price);
+        if (price <= 5000) return price*2;
+        if (price <=10000) return price*1.5;
+        if (price > 10000) return price+5000;
+    }
+    
+    //Фреза цилиндрическая насадная 100х125х40 Z=14 Р6М5
+    let workingWithName = (name) => {
+        
+        let kolvoZubiev = name.match(/Z{1}\s?={1}\s?\d{1,3}/gi)[0].replace(/Z{1}\s?={1}\s?/,'');
+        let material = name.match(/Z{1}\s?={1}\s?\d{1,3}\s.+/gi)[0].replace(/Z{1}\s?={1}\s?\d{1,3}\s/,'');
+        let diametr = name.match(/\d{1,3},?\d{1,3}\s?х/gi)[0].replace('х','');
+        let dlina = name.match(/\d{1,3},?\d{1,3}\s?х/gi)[1].replace('х','');
+        
+        let htmlBody = 
+            '<h2 class="header_group">Описание</h2><p><b>' 
+            + name.replace(/Z.+/, `, количество зубьев - ${kolvoZubiev}, материал - ${material}`) 
+            + '</b></p>';
+    
+        let seoTitle = name + ' - Цилиндрические насадные' + " - Каталог оборудования | Станкопромышленная компания";
+        let seoKeyWords = 'фреза, цилиндрическая, насадная, материал, ' + material + ', диаметр, ' + diametr;
+    
+        return { htmlBody, diametr, kolvoZubiev, material, dlina, seoTitle, seoDescription: name, seoKeyWords };
+    }
+    
+    let tableRows = document.querySelectorAll('.b_items_list tbody tr');
+    let arr = [];
+    tableRows.forEach( (el,idx) => {
+        
+        let sku = el.querySelector('.bil_id span').innerText;
+        let price = priceCalculation( +el.querySelector('.bil_price').innerText );
+        let additionInfo = workingWithName( el.querySelector('[itemprop="url"] span').innerText );
+    
+        let data = { sku, price, id: `cilind_nasad_${idx}`, ...additionInfo };
+        arr.push( JSON.stringify(data) );
+    });
+    
+    
+    getFileFromBlob(arr);
+} // get
