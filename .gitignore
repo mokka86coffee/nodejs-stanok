@@ -1,0 +1,12 @@
+/src
+/dist
+/node_modules
+/additional
+*.csv
+*.css
+*.html
+*.json
+
+forWebpack.js
+app.js
+webpack.config.js
